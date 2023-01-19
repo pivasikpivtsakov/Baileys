@@ -8,6 +8,7 @@ import type { BaileysEventEmitter, Chat, ConnectionState, Contact, GroupMetadata
 import { toNumber, updateMessageWithReaction, updateMessageWithReceipt } from '../Utils'
 import { jidNormalizedUser } from '../WABinary'
 import makeOrderedDictionary from './make-ordered-dictionary'
+import { LabelAssociation } from '../Types/Label'
 
 type WASocket = ReturnType<typeof makeMDSocket>
 
@@ -38,6 +39,7 @@ export default (
 	const groupMetadata: { [_: string]: GroupMetadata } = { }
 	const presences: { [id: string]: { [participant: string]: PresenceData } } = { }
 	const state: ConnectionState = { connection: 'close' }
+	const labelAssociations: { [_: string]: LabelAssociation } = { }
 
 	const assertMessageList = (jid: string) => {
 		if(!messages[jid]) {
@@ -241,6 +243,17 @@ export default (
 				}
 			}
 		})
+
+		ev.on('labelAssociation.set', ({ chat, label, type = 'jid' }) => {
+			const id = chat + label
+			labelAssociations[id] = { id, associatioinId: chat, labelId: label, type }
+			console.log('added lbl', labelAssociations[id])
+		})
+		ev.on('labelAssociation.delete', ({ chat, label }) => {
+			const id = chat + label
+			console.log('rm lbl', labelAssociations[id])
+			delete labelAssociations[id]
+		})
 	}
 
 	const toJSON = () => ({
@@ -268,6 +281,7 @@ export default (
 		groupMetadata,
 		state,
 		presences,
+		labelAssociations,
 		bind,
 		/** loads messages from the store, if not found -- uses the legacy connection */
 		loadMessages: async(jid: string, count: number, cursor: WAMessageCursor) => {
@@ -353,6 +367,7 @@ export default (
 				const json = JSON.parse(jsonStr)
 				fromJSON(json)
 			}
-		}
+		},
+		getLabels: () => labelAssociations
 	}
 }

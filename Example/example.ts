@@ -118,6 +118,8 @@ const startSock = async() => {
 							console.log('replying to', msg.key.remoteJid)
 							await sock!.readMessages([msg.key])
 							await sendMessageWTyping({ text: 'Hello there!' }, msg.key.remoteJid!)
+							// example of assigning label
+							await sock.setLabels(msg.key.remoteJid!, {labeled: true, index: '1'})
 						}
 					}
 				}
@@ -166,4 +168,13 @@ const startSock = async() => {
 	return sock
 }
 
-startSock()
+startSock().then(
+	sock => {
+		setTimeout(async() => {
+			// example of reading all label associations
+			const labels = store?.getLabels()
+			console.log('labels')
+			console.log(labels)
+		}, 30 * 1000)
+	}
+)

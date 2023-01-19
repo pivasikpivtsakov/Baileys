@@ -7,6 +7,7 @@ import { makeMutex } from '../Utils/make-mutex'
 import processMessage from '../Utils/process-message'
 import { BinaryNode, getBinaryNodeChild, getBinaryNodeChildren, jidNormalizedUser, reduceBinaryNodeToDictionary, S_WHATSAPP_NET } from '../WABinary'
 import { makeSocket } from './socket'
+import { LabelMutation } from '../Types/Label'
 
 const MAX_SYNC_ATTEMPTS = 2
 
@@ -700,6 +701,10 @@ export const makeChatsSocket = (config: SocketConfig) => {
 		return appPatch(patch)
 	}
 
+	const setLabels = async(toJid: string, labelMutation: LabelMutation) => {
+		return await chatModify({ labelMutation }, toJid)
+	}
+
 	/**
 	 * queries need to be fired on connection open
 	 * help ensure parity with WA Web
@@ -859,6 +864,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 		updateBlockStatus,
 		getBusinessProfile,
 		resyncAppState,
-		chatModify
+		chatModify,
+		setLabels,
 	}
 }
